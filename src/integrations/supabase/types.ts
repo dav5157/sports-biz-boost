@@ -324,6 +324,44 @@ export type Database = {
           },
         ]
       }
+      employee_work_schedules: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_time: string
+          id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_time: string
+          id?: string
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_work_schedules_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           base_salary: number | null
@@ -494,6 +532,86 @@ export type Database = {
           is_available?: boolean | null
           room_name?: string
           room_number?: string
+        }
+        Relationships: []
+      }
+      schedule_exceptions: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_time: string | null
+          exception_date: string
+          id: string
+          is_available: boolean
+          reason: string | null
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_time?: string | null
+          exception_date: string
+          id?: string
+          is_available?: boolean
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_time?: string | null
+          exception_date?: string
+          id?: string
+          is_available?: boolean
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_exceptions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog: {
+        Row: {
+          base_price: number
+          code: string
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          code: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          code?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
