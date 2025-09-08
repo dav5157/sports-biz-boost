@@ -1,9 +1,75 @@
+
+
+import { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Dashboard from "@/components/Dashboard";
 import SmartScheduler from "@/components/SmartScheduler";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Calendar, Users, Settings, FileText, TrendingUp } from "lucide-react";
+import { BarChart, Calendar, Users, TrendingUp, FileText, Settings } from "lucide-react";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 const Index = () => {
+  // Analytics state
+  const [analyticsDate, setAnalyticsDate] = useState(new Date().toISOString().split('T')[0]);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
+
+  // Reports state
+  const [reportType, setReportType] = useState("daily");
+  const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reportData, setReportData] = useState<any>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState("");
+
+  useEffect(() => {
+    setAnalyticsLoading(true);
+    setAnalyticsError("");
+    fetch(`${API_URL}/api/analytics?date=${analyticsDate}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch analytics");
+        return res.json();
+      })
+      .then(setAnalyticsData)
+      .catch((e) => setAnalyticsError(e.message))
+      .finally(() => setAnalyticsLoading(false));
+  }, [analyticsDate]);
+
+  useEffect(() => {
+    setReportLoading(true);
+    setReportError("");
+    fetch(`${API_URL}/api/reports?type=${reportType}&date=${reportDate}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch report");
+        return res.json();
+      })
+      .then(setReportData)
+      .catch((e) => setReportError(e.message))
+      .finally(() => setReportLoading(false));
+  }, [reportType, reportDate]);
+
+  const handleAnalyticsExport = () => {
+    if (!analyticsData) return;
+    const ws = XLSX.utils.json_to_sheet([analyticsData]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Analytics");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buf], { type: "application/octet-stream" });
+    saveAs(blob, `analytics_${analyticsDate}.xlsx`);
+  };
+
+  const handleReportExport = () => {
+    if (!reportData) return;
+    const ws = XLSX.utils.json_to_sheet(Array.isArray(reportData) ? reportData : [reportData]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buf], { type: "application/octet-stream" });
+    saveAs(blob, `report_${reportType}_${reportDate}.xlsx`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/5">
       <main className="container mx-auto px-4 py-6">
@@ -52,19 +118,32 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <div className="text-center py-12">
-              <TrendingUp className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-2xl font-semibold mb-2">Advanced Analytics</h3>
-              <p className="text-muted-foreground">Coming soon - Predictive analytics and business intelligence</p>
+            <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+              <input type="date" value={analyticsDate} onChange={e => setAnalyticsDate(e.target.value)} className="px-3 py-2 border rounded-lg bg-card" />
+              <button onClick={handleAnalyticsExport} className="px-4 py-2 rounded bg-primary text-white disabled:opacity-50" disabled={!analyticsData}>Export</button>
             </div>
+            {analyticsLoading && <div className="text-center text-lg">Loading...</div>}
+            {analyticsError && <div className="text-center text-red-500">{analyticsError}</div>}
+            {!analyticsLoading && !analyticsError && analyticsData && (
+              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">{JSON.stringify(analyticsData, null, 2)}</pre>
+            )}
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-2xl font-semibold mb-2">Report Generation</h3>
-              <p className="text-muted-foreground">Coming soon - Automated daily, weekly, and quarterly reports</p>
+            <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+              <select value={reportType} onChange={e => setReportType(e.target.value)} className="px-3 py-2 border rounded-lg bg-card">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+              <input type="date" value={reportDate} onChange={e => setReportDate(e.target.value)} className="px-3 py-2 border rounded-lg bg-card" />
+              <button onClick={handleReportExport} className="px-4 py-2 rounded bg-primary text-white disabled:opacity-50" disabled={!reportData}>Export</button>
             </div>
+            {reportLoading && <div className="text-center text-lg">Loading...</div>}
+            {reportError && <div className="text-center text-red-500">{reportError}</div>}
+            {!reportLoading && !reportError && reportData && (
+              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">{JSON.stringify(reportData, null, 2)}</pre>
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
