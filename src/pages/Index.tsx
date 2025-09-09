@@ -9,6 +9,7 @@ import SmartScheduler from "@/components/SmartScheduler";
 import { BarChart, Calendar, Users, TrendingUp, FileText, Settings, PlusCircle, UserCheck } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { DailyReport, WeeklyReport } from "@/components/ReportCards";
+import AnalyticsPanel from "@/components/AnalyticsPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -136,7 +137,7 @@ const Index = () => {
             {analyticsLoading && <div className="text-center text-lg">Loading...</div>}
             {analyticsError && <div className="text-center text-red-500">{analyticsError}</div>}
             {!analyticsLoading && !analyticsError && analyticsData && (
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">{JSON.stringify(analyticsData, null, 2)}</pre>
+              <AnalyticsPanel data={analyticsData} />
             )}
           </TabsContent>
 
