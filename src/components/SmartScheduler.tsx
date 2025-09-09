@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const SmartScheduler = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
