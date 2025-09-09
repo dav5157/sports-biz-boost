@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
+from .mock_endpoints import router as mock_router
+
 router = APIRouter()
 
-# Import and include all API routers here
-# from . import employees, appointments, analytics, alerts, reports
-# router.include_router(employees.router, prefix="/employees", tags=["employees"])
-# ...existing code...
+# Register mock endpoints for analytics, reports, scheduler
+router.include_router(mock_router)

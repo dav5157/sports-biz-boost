@@ -22,6 +22,12 @@ class Employee(Base):
     is_active = Column(Boolean, default=True)
     appointments = relationship("Appointment", back_populates="therapist")
 
+class Room(Base):
+    __tablename__ = "rooms"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, unique=True)
+    appointments = relationship("Appointment", back_populates="room")
+
 class Client(Base):
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True, index=True)
@@ -34,11 +40,13 @@ class Appointment(Base):
     id = Column(Integer, primary_key=True, index=True)
     therapist_id = Column(Integer, ForeignKey("employees.id"))
     client_id = Column(Integer, ForeignKey("clients.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id"))
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
     revenue = Column(Float, nullable=False)
     status = Column(String, default="booked")
     therapist = relationship("Employee", back_populates="appointments")
     client = relationship("Client", back_populates="appointments")
+    room = relationship("Room", back_populates="appointments")
 
 # Add more models for classes, attendance, resources, salaries, alerts, reports, etc.

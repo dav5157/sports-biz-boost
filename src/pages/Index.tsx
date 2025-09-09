@@ -6,11 +6,14 @@ import * as XLSX from "xlsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Dashboard from "@/components/Dashboard";
 import SmartScheduler from "@/components/SmartScheduler";
-import { BarChart, Calendar, Users, TrendingUp, FileText, Settings } from "lucide-react";
+import { BarChart, Calendar, Users, TrendingUp, FileText, Settings, PlusCircle, UserCheck } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { DailyReport, WeeklyReport } from "@/components/ReportCards";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const Index = () => {
+  const navigate = useNavigate();
   // Analytics state
   const [analyticsDate, setAnalyticsDate] = useState(new Date().toISOString().split('T')[0]);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
@@ -74,7 +77,15 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/5">
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8 bg-card/80 backdrop-blur-sm shadow-soft">
+  <TabsList className="grid w-full grid-cols-8 mb-8 bg-card/80 backdrop-blur-sm shadow-soft">
+      <TabsTrigger value="employee-advice" className="flex items-center gap-2" onClick={() => navigate('/employee-advice')}>
+        <UserCheck className="w-4 h-4" />
+        Employee Advice
+      </TabsTrigger>
+          <TabsTrigger value="appointment" className="flex items-center gap-2" onClick={() => navigate('/appointment')}>
+            <PlusCircle className="w-4 h-4" />
+            New Appointment
+          </TabsTrigger>
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
               Dashboard
@@ -134,7 +145,7 @@ const Index = () => {
               <select value={reportType} onChange={e => setReportType(e.target.value)} className="px-3 py-2 border rounded-lg bg-card">
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
+                {/* <option value="monthly">Monthly</option> */}
               </select>
               <input type="date" value={reportDate} onChange={e => setReportDate(e.target.value)} className="px-3 py-2 border rounded-lg bg-card" />
               <button onClick={handleReportExport} className="px-4 py-2 rounded bg-primary text-white disabled:opacity-50" disabled={!reportData}>Export</button>
@@ -142,7 +153,10 @@ const Index = () => {
             {reportLoading && <div className="text-center text-lg">Loading...</div>}
             {reportError && <div className="text-center text-red-500">{reportError}</div>}
             {!reportLoading && !reportError && reportData && (
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">{JSON.stringify(reportData, null, 2)}</pre>
+              <>
+                {reportType === "daily" && <DailyReport data={reportData} />}
+                {reportType === "weekly" && <WeeklyReport data={reportData} />}
+              </>
             )}
           </TabsContent>
 
